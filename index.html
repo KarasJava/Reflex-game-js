@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Reflex game</title>
+	
+	<meta charset="utf-8"/>
+
+
+</head>
+<style>
+body {
+	background-color: black;
+	color: #FA6900;
+	font-family: sans-serif;
+}
+
+button {
+	display: block;
+	height: 30px;
+	width: 100px;
+	border: 3px solid #F38630;
+	border-radius: 7px;
+	text-align: center;
+	margin: 0 auto 5px auto;
+	background-color: #E0E4CC;
+	color: blue;
+	transition: background-color 0.10s;
+}
+
+button:hover {
+	background-color: #69D2E7;
+}
+
+button:active {
+	background-color: #FA6900;
+	color: #E0E4CC;
+	border-color: #E0E4CC;
+}
+
+button:focus {
+	outline: none;
+}
+
+.centered {
+	display: block;
+	margin: 0 auto;
+}
+
+#container {
+	width: 42vw;
+	height: 37vw;
+	background-color: black;
+	border: 4px solid #F38630;
+	border-radius: 5%;
+	padding: 25px 25px 50px 25px;
+}
+
+
+#box {
+	position:relative;
+	width: 10%;
+	height: 10%;
+	background-color: red;
+	display: none;
+}
+
+#gameField {
+	width: 75%;
+	height: 94%;
+	background-color: #E0E4CC;
+	border: 3px solid #F38630;
+	margin: 20px 0 0 25px;
+}	
+
+#title, #score, #highScore #games #averangeTime {
+	width: 100%;
+	text-align: center;
+}
+
+#title {
+	font-size: 3vw;
+}
+
+#score, #highScore #games #averangeTime{
+	font-size: 1vw;
+}
+
+#innerContainer {
+	width: 100%;
+	height: 90%;
+	display: flex;
+	flex-wrap: nowrap;
+}
+
+#options {
+	width: 20%;
+	margin-top: 20px;
+}
+
+#score, #highScore #games #averangeTime{
+	display: flex;
+	flex-wrap: nowrap;
+}
+
+@media (max-width: 1300px) {
+
+	#container {
+		width: 63vw;
+		height: 55vw;
+	}
+
+	#title {
+		font-size: 4.5vw;
+	}	
+
+	#score, #highScore #games{
+		font-size: 1.5vw;
+	}
+
+}
+
+@media (max-width: 800px) {
+
+	#container {
+		width: 84vw;
+		height: 74vw;
+	}
+
+	#title {
+		font-size: 6vw;
+	}
+
+	#score, #highScore #games #averangeTime{
+		font-size: 2vw;
+	}
+
+}
+
+</style>
+<body>
+
+	<div id="container" class="centered">
+
+		<h1 id="title" class="centered">REFLEX GAME</h1>
+
+
+		<div id="innerContainer">
+
+			<div id="options">
+
+				
+
+				<button id="startButton">Start</button>
+
+				<button id="endButton">Stop</button>
+
+				<button id="resetButton">Reset Scores</button>
+				
+				<p id="score" class="centered">Reaction: <span id="result">0.00</span>s</p>
+
+				<p id="highScore" class="centered">Best react: <span id="highScoreResult">0.00</span>s</p>
+				
+				<p id="averangeTime" class="centered">Average: <span id="averangeTime">0.00</span>s</p>
+				
+				<p id="games" class="centered">Games: <span id="games">0</span> </p>
+				
+			</div>
+			
+			<div id="gameField">
+
+					<div id="box"></div>
+
+			</div>
+
+			
+		</div>
+
+
+	</div>
+
+	
+	<script>
+var spawnTime;
+var clickDelay;
+
+var xpos; var ypos;
+var fieldWidth = document.getElementById("gameField").clientWidth;
+
+var shapes = ["0%", "50%"];
+
+var bestTime = 0;
+
+var timer;
+
+var gameCounter = 0 ;
+
+
+var avgTime = []
+
+function flash() {
+	var gameFieldColour = document.getElementById("gameField").style.backgroundColor;
+	var boxColour = document.getElementById("box").style.backgroundColor;
+
+	document.getElementById("gameField").style.backgroundColor = boxColour;
+	document.getElementById("box").style.backgroundColor = gameFieldColour;
+
+	setTimeout(function() {
+
+			document.getElementById("gameField").style.backgroundColor = gameFieldColour;
+			document.getElementById("box").style.backgroundColor = boxColour;
+		}, 10);
+
+}
+
+function randomColor() {
+	var letters = "0123456789ABCDEF".split("");
+	var color = "#";
+	for (var i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random()*16)];
+	}
+	return color;
+}
+
+document.getElementById("startButton").onclick = function() {
+
+	function showBox () {
+
+		timer = setTimeout(function() {
+
+			xpos = (Math.floor(Math.random()*90)/100)*fieldWidth;
+			document.getElementById("box").style.left = xpos + "px";
+
+			ypos = (Math.floor(Math.random()*90)/100)*fieldWidth;
+			document.getElementById("box").style.top = ypos + "px";
+
+			document.getElementById("box").style.borderRadius = shapes[Math.floor(Math.random()*2)] 
+
+			document.getElementById("box").style.backgroundColor = randomColor();
+
+
+			document.getElementById("box").style.display="block";
+
+			spawnTime = Date.now();
+
+		}, Math.random()*5000);
+		
+	}
+	
+
+	function gameCount() {
+		gameCounter += 1;
+		return gameCounter;
+	}
+
+	showBox();
+
+	document.getElementById("box").onclick = function () {
+		
+		flash();
+
+		this.style.display='none';
+	
+		clickDelay = Math.floor((Date.now() - spawnTime) / 10) / 100;
+
+		if (bestTime == 0) {
+			bestTime = clickDelay;
+		} else if (clickDelay < bestTime) {
+			bestTime = clickDelay;
+		}
+		
+
+		document.getElementById("result").innerHTML = clickDelay;
+
+		document.getElementById("highScoreResult").innerHTML = bestTime;
+		
+
+		document.getElementById("games").innerHTML = "Games: " + gameCount();
+		
+		showBox();
+	}
+	
+	
+
+	document.getElementById("endButton").onclick = function() {
+
+		clearTimeout(timer);
+
+		document.getElementById("box").style.display = "none";
+
+	}
+
+	
+}
+
+document.getElementById("resetButton").onclick	= function() {
+
+	document.getElementById("result").innerHTML = "0.00";
+	document.getElementById("highScoreResult").innerHTML = "0.00";
+	document.getElementById("averangeTime").innerHTML = "Average: 0.00s";
+	document.getElementById("games").innerHTML = "Games: 0";
+
+}</script>
+
+</body>
+</html>
